@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0B1F3A">
+  <meta name="description" content="Simulador profissional de economia de energia da Energizar Livre.">
+  <meta name="author" content="Energizar Livre">
+
+  <title>Simulador de Economia | Energizar Livre</title>
+
+  <link rel="preload" href="./style.css" as="style">
+  <link rel="stylesheet" href="./style.css">
+
+  <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="./assets/apple-touch-icon.png">
+</head>
+
+<body>
+  <a class="skip-link" href="#main-content">Ir para o conteúdo principal</a>
+
+  <div class="app-shell">
+    <header class="app-header" aria-label="Cabeçalho principal">
+      <div class="app-header__content">
+        <a
+          class="brand"
+          href="./"
+          aria-label="Energizar Livre - Página inicial do simulador"
+        >
+          <img
+            class="brand__logo"
+            src="./assets/logo-energizar-livre.svg"
+            alt="Logotipo da Energizar Livre"
+            width="180"
+            height="56"
+          >
+        </a>
+
+        <div class="app-header__actions">
+          <span
+            class="status-badge"
+            id="applicationStatus"
+            role="status"
+            aria-live="polite"
+          >
+            Sistema pronto
+          </span>
+
+          <button
+            class="icon-button"
+            id="resetApplicationButton"
+            type="button"
+            aria-label="Limpar todos os dados da simulação"
+            title="Limpar simulação"
+          >
+            <span aria-hidden="true">↺</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="main-content" id="main-content">
+      <section class="hero-section" aria-labelledby="pageTitle">
+        <div class="hero-section__content">
+          <div>
+            <p class="eyebrow">Energizar Livre</p>
+            <h1 id="pageTitle">Simulador de economia de energia</h1>
+            <p class="hero-section__description">
+              Cole os dados extraídos da fatura, revise as informações,
+              ajuste o desconto e gere uma arte profissional para o cliente.
+            </p>
+          </div>
+
+          <div class="progress-steps" aria-label="Etapas da simulação">
+            <div class="progress-step progress-step--active" data-step="1">
+              <span class="progress-step__number">1</span>
+              <span class="progress-step__label">Dados</span>
+            </div>
+
+            <div class="progress-step" data-step="2">
+              <span class="progress-step__number">2</span>
+              <span class="progress-step__label">Revisão</span>
+            </div>
+
+            <div class="progress-step" data-step="3">
+              <span class="progress-step__number">3</span>
+              <span class="progress-step__label">Arte</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="workspace">
+        <section class="workspace__form" aria-label="Formulário da simulação">
+          <form id="simulationForm" novalidate>
+            <article class="panel" aria-labelledby="importTitle">
+              <div class="panel__header">
+                <div>
+                  <p class="panel__eyebrow">Entrada rápida</p>
+                  <h2 id="importTitle">Importar dados da fatura</h2>
+                </div>
+
+                <button
+                  class="text-button"
+                  id="clearRawDataButton"
+                  type="button"
+                >
+                  Limpar texto
+                </button>
+              </div>
+
+              <div class="field-group">
+                <label for="rawInvoiceData">
+                  Dados gerados pelo GPT Leitor de Faturas
+                </label>
+
+                <textarea
+                  id="rawInvoiceData"
+                  name="rawInvoiceData"
+                  rows="10"
+                  spellcheck="false"
+                  autocomplete="off"
+                  placeholder="Cole aqui os dados extraídos da fatura..."
+                  aria-describedby="rawInvoiceDataHelp"
+                ></textarea>
+
+                <p class="field-help" id="rawInvoiceDataHelp">
+                  O sistema identificará automaticamente os campos reconhecidos.
+                </p>
+              </div>
+
+              <div class="panel__actions">
+                <button
+                  class="button button--primary"
+                  id="processInvoiceButton"
+                  type="button"
+                >
+                  Processar dados
+                </button>
+              </div>
+
+              <div
+                class="feedback-box feedback-box--hidden"
+                id="importFeedback"
+                role="status"
+                aria-live="polite"
+              ></div>
+            </article>
+
+            <article class="panel" aria-labelledby="customerDataTitle">
+              <div class="panel__header">
+                <div>
+                  <p class="panel__eyebrow">Identificação</p>
+                  <h2 id="customerDataTitle">Dados do cliente e da unidade</h2>
+                </div>
+              </div>
+
+              <div class="form-grid">
+                <div class="field-group field-group--full">
+                  <label for="customerName">Nome do cliente</label>
+                  <input
+                    id="customerName"
+                    name="customerName"
+                    type="text"
+                    maxlength="120"
+                    autocomplete="name"
+                    placeholder="Nome completo ou razão social"
+                  >
+                  <p class="field-error" id="customerNameError"></p>
+                </div>
+
+                <div class="field-group">
+                  <label for="utilityCompany">
+                    Distribuidora
+                    <span class="required-mark" aria-hidden="true">*</span>
+                  </label>
+                  <select
+                    id="utilityCompany"
+                    name="utilityCompany"
+                    required
+                    aria-describedby="utilityCompanyError"
+                  >
+                    <option value="">Selecione</option>
+                    <option value="energisa">Energisa</option>
+                    <option value="copel">Copel</option>
+                    <option value="celesc">Celesc</option>
+                    <option value="equatorial">Equatorial</option>
+                    <option value="enel">Enel</option>
+                    <option value="neoenergia">Neoenergia</option>
+                    <option value="outra">Outra</option>
+                  </select>
+                  <p class="field-error" id="utilityCompanyError"></p>
+                </div>
+
+                <div class="field-group">
+                  <label for="consumerUnit">Unidade consumidora</label>
+                  <input
+                    id="consumerUnit"
+                    name="consumerUnit"
+                    type="text"
+                    inputmode="numeric"
+                    maxlength="30"
+                    autocomplete="off"
+                    placeholder="Número da UC"
+                  >
+                  <p class="field-error" id="consumerUnitError"></p>
+                </div>
+
+                <div class="field-group">
+                  <label for="referenceMonth">
+                    Referência
+                    <span class="required-mark" aria-hidden="true">*</span>
+                  </label>
+                  <input
+                    id="referenceMonth"
+                    name="referenceMonth"
+                    type="month"
+                    required
+                    aria-describedby="referenceMonthError"
+                  >
+                  <p class="field-error" id="referenceMonthError"></p>
+                </div>
+
+                <div class="field-group">
+                  <label for="dueDate">Vencimento</label>
+                  <input
+                    id="dueDate"
+                    name="dueDate"
+                    type="date"
+                    aria-describedby="dueDateError"
+                  >
+                  <p class="field-error" id="dueDateError"></p>
+                </div>
+
+                <div class="field-group">
+                  <label for="supplyType">Tipo de fornecimento</label>
+                  <select id="supplyType" name="supplyType">
+                    <option value="">Não informado</option>
+                    <option value="monofasico">Monofásico</option>
+                    <option value="bifasico">Bifásico</option>
+                    <option value="trifasico">Trifásico</option>
+                  </select>
+                  <p class="field-error" id="supplyTypeError"></p>
+                </div>
+
+                <div class="field-group">
+                  <label for="nominalVoltage">Tensão nominal</label>
+                  <input
+                    id="nominalVoltage"
+                    name="nominalVoltage"
+                    type="text"
+                    maxlength="30"
+                    placeholder="Ex.: 127/220 V"
+                  >
+                  <p class="field-error" id="nominalVoltageError"></p>
+                </div>
+              </div>
+            </article>
+
+            <article class="panel" aria-labelledby="invoiceDataTitle">
+              <div class="panel__header">
+                <div>
+                  <p class="panel__eyebrow">Fatura atual</p>
+                  <h2 id="invoiceDataTitle">Valores e consumo</h2>
+                </div>
+              </div>
+
+              <div class="form-grid">
+                <div class="field-group">
+                  <label for="energyConsumption">
+                    Consumo
+                    <span class="required-mark" aria-hidden="true">*</span>
+                  </label>
+
+                  <div class="input-with-suffix">
+                    <input
+                      id="energyConsumption"
+                      name="energyConsumption"
+                      type="text"
+                      inputmode="decimal"
+                      autocomplete="off"
+                      placeholder="0"
+                      required
+                      aria-describedby="energyConsumptionError"
+                    >
+                    <span class="input-suffix">kWh</span>
+                  </div>
+
+                  <p class="field-error" id="energyConsumptionError"></p>
+                </div>
+
+                <div class="field-group">
+                  <label for="currentInvoiceValue">
+                    Valor total da fatura
+                    <span class="required-mark" aria-hidden="true">*</span>
+                  </label>
+
+                  <div class="input-with-prefix">
+                    <span class="input-prefix">R$</span>
+                    <input
+                      id="currentInvoiceValue"
+                      name="currentInvoiceValue"
+                      type="text"
+                      inputmode="decimal"
+                      autocomplete="off"
+                      placeholder="0,00"
+                      required
+                      aria-describedby="currentInvoiceValueError"
+                    >
+                  </div>
+
+                  <p class="field-error" id="currentInvoiceValueError"></p>
+                </div>
+
+                <div class="field-group">
+                  <label for="utilityKwhRate">
+                    Tarifa da distribuidora
+                    <span class="required-mark" aria-hidden="true">*</span>
+                  </label>
+
+                  <div class="input-with-prefix input-with-suffix">
+                    <span class="input-prefix">R$</span>
+                    <input
+                      id="utilityKwhRate"
+                      name="utilityKwhRate"
+                      type="text"
+                      inputmode="decimal"
+                      autocomplete="off"
+                      placeholder="0,00"
+                      required
+                      aria-describedby="utilityKwhRateError"
+                    >
+                    <span class="input-suffix">/kWh</span>
+                  </div>
+
+                  <p class="field-error" id="utilityKwhRateError"></p>
+                </div>
+
+                <div class="field-group">
+                  <label for="energizarKwhRate">
+                    Tarifa Energizar Livre
+                    <span class="required-mark" aria-hidden="true">*</span>
+                  </label>
+
+                  <div class="input-with-prefix input-with-suffix">
+                    <span class="input-prefix">R$</span>
+                    <input
+                      id="energizarKwhRate"
+                      name="energizarKwhRate"
+                      type="text"
+                      inputmode="decimal"
+                      autocomplete="off"
+                      value="0,85"
+                      required
+                      aria-describedby="energizarKwhRateError"
+                    >
+                    <span class="input-suffix">/kWh</span>
+                  </div>
+
+                  <p class="field-error" id="energizarKwhRateError"></p>
+                </div>
+
+                <div class="field-group">
+                  <label for="cosipValue">COSIP / CIP</label>
+
+                  <div class="input-with-prefix">
+                    <span class="input-prefix">R$</span>
+                    <input
+                      id="cosipValue"
+                      name="cosipValue"
+                      type="text"
+                      inputmode="decimal"
+                      autocomplete="off"
+                      value="0,00"
+                      placeholder="0,00"
+                      aria-describedby="cosipValueError"
+                    >
+                  </div>
+
+                  <p class="field-error" id="cosipValueError"></p>
+                </div>
+
+                <div class="field-group">
+                  <label for="connectionFee">Taxa de adesão</label>
+
+                  <div class="input-with-prefix">
+                    <span class="input-prefix">R$</span>
+                    <input
+                      id="connectionFee"
+                      name="connectionFee"
+                      type="text"
+                      inputmode="decimal"
+                      autocomplete="off"
+                      value="50,00"
+                      placeholder="0,00"
+                      aria-describedby="connectionFeeError"
+                    >
+                  </div>
+
+                  <p class="field-error" id="connectionFeeError"></p>
+                </div>
+              </div>
+            </article>
+
+            <article class="panel" aria-labelledby="additionalChargesTitle">
+              <div class="panel__header">
+                <div>
+                  <p class="panel__eyebrow">Composição adicional</p>
+                  <h2 id="additionalChargesTitle">Encargos e ajustes</h2>
+                </div>
+
+                <button
+                  class="text-button"
+                  id="resetAdditionalChargesButton"
+                  type="button"
+                >
+                  Zerar encargos
+                </button>
+              </div>
+
+              <div class="form-grid">
+                <div class="field-group">
+                  <label for="installmentsValue">Parcelamentos</label>
+                  <div class="input-with-prefix">
+                    <span class="input-prefix">R$</span>
+                    <input
+                      id="installmentsValue"
+                      name="installmentsValue"
+                      type="text"
+                      inputmode="decimal"
+                      value="0,00"
+                      aria-describedby="installmentsValueError"
+                    >
+                  </div>
+                  <p class="field-error" id="installmentsValueError"></p>
+                </div>
+
+                <div class="field-group">
+                  <label for="finesValue">Multas</label>
+                  <div class="input-with-prefix">
+                    <span class="input-prefix">R$</span>
+                    <input
+                      id="finesValue"
+                      name="finesValue"
+                      type="text"
+                      inputmode="decimal"
+                      value="0,00"
+                      aria-describedby="finesValueError"
+                    >
+                  </div>
+                  <p class="field-error" id="finesValueError"></p>
+                </div>
+
+                <div class="field-group">
+                  <label for="interestValue">Juros</label>
+                  <div class="input-with-prefix">
+                    <span class="input-prefix">R$</span>
+                    <input
+                      id="interestValue"
+                      name="interestValue"
+                      type="text"
+                      inputmode="decimal"
+                      value="0,00"
+                      aria-describedby="interestValueError"
+                    >
+                  </div>
+                  <p class="field-error" id="interestValueError"></p>
+                </div>
+
+                <div class="field-group">
+                  <label for="monetaryCorrectionValue">
+                    Correção monetária
+                  </label>
+                  <div class="input-with-prefix">
+                    <span class="input-prefix">R$</span>
+                    <input
+                      id="monetaryCorrectionValue"
+                      name="monetaryCorrectionValue"
+                      type="text"
+                      inputmode="decimal"
+                      value="0,00"
+                      aria-describedby="monetaryCorrectionValueError"
+                    >
+                  </div>
+                  <p
+                    class="field-error"
+                    id="monetaryCorrectionValueError"
+                  ></p>
+                </div>
+              </div>
+
+              <div class="notice notice--info">
+                <strong>Atenção:</strong>
+                multas, juros, parcelamentos e correções não compõem a economia
+                sobre o consumo, mas permanecem registrados para conferência.
+              </div>
+            </article>
+
+            <article class="panel" aria-labelledby="discountTitle">
+              <div class="panel__header">
+                <div>
+                  <p class="panel__eyebrow">Condição comercial</p>
+                  <h2 id="discountTitle">Percentual de desconto</h2>
+                </div>
+
+                <output
+                  class="discount-output"
+                  id="discountOutput"
+                  for="discountPercentage"
+                >
+                  40%
+                </output>
+              </div>
+
+              <div class="range-field">
+                <input
+                  id="discountPercentage"
+                  name="discountPercentage"
+                  type="range"
+                  min="0"
+                  max="40"
+                  step="0.5"
+                  value="40"
+                  aria-describedby="discountHelp"
+                >
+
+                <div class="range-field__labels" aria-hidden="true">
+                  <span>0%</span>
+                  <span>20%</span>
+                  <span>40%</span>
+                </div>
+
+                <p class="field-help" id="discountHelp">
+                  O limite máximo configurado para esta simulação é de 40%.
+                </p>
+              </div>
+            </article>
+
+            <article class="panel panel--validation" aria-labelledby="reviewTitle">
+              <div class="panel__header">
+                <div>
+                  <p class="panel__eyebrow">Revisor 1</p>
+                  <h2 id="reviewTitle">Validação dos dados</h2>
+                </div>
+
+                <span
+                  class="validation-status validation-status--pending"
+                  id="validationStatus"
+                >
+                  Aguardando revisão
+                </span>
+              </div>
+
+              <div
+                class="validation-summary"
+                id="validationSummary"
+                role="status"
+                aria-live="polite"
+              >
+                Preencha os campos obrigatórios para iniciar a validação.
+              </div>
+
+              <ul class="validation-list" id="validationList"></ul>
+            </article>
+
+            <div class="sticky-actions" aria-label="Ações da simulação">
+              <button
+                class="button button--secondary"
+                id="reviewSimulationButton"
+                type="button"
+              >
+                Revisar simulação
+              </button>
+
+              <button
+                class="button button--primary"
+                id="generateArtworkButton"
+                type="button"
+                disabled
+              >
+                Gerar arte
+              </button>
+            </div>
+          </form>
+        </section>
+
+        <aside class="workspace__preview" aria-label="Resumo da simulação">
+          <div class="preview-container">
+            <article class="summary-card" aria-labelledby="summaryTitle">
+              <div class="summary-card__header">
+                <div>
+                  <p class="panel__eyebrow">Prévia dos cálculos</p>
+                  <h2 id="summaryTitle">Resumo da economia</h2>
+                </div>
+
+                <span
+                  class="summary-card__status"
+                  id="calculationStatus"
+                  aria-live="polite"
+                >
+                  Não calculado
+                </span>
+              </div>
+
+              <dl class="summary-list">
+                <div class="summary-list__item">
+                  <dt>Fatura atual</dt>
+                  <dd id="summaryCurrentInvoice">R$ 0,00</dd>
+                </div>
+
+                <div class="summary-list__item">
+                  <dt>Novo valor estimado</dt>
+                  <dd id="summaryNewInvoice">R$ 0,00</dd>
+                </div>
+
+                <div class="summary-list__item summary-list__item--highlight">
+                  <dt>Economia mensal</dt>
+                  <dd id="summaryMonthlySavings">R$ 0,00</dd>
+                </div>
+
+                <div class="summary-list__item">
+                  <dt>Economia anual</dt>
+                  <dd id="summaryAnnualSavings">R$ 0,00</dd>
+                </div>
+
+                <div class="summary-list__item">
+                  <dt>Desconto aplicado</dt>
+                  <dd id="summaryDiscount">40%</dd>
+                </div>
+              </dl>
+            </article>
+
+            <article class="panel panel--review" aria-labelledby="secondReviewTitle">
+              <div class="panel__header">
+                <div>
+                  <p class="panel__eyebrow">Revisor 2</p>
+                  <h2 id="secondReviewTitle">Conferência da arte</h2>
+                </div>
+              </div>
+
+              <ul class="review-checklist" id="artworkReviewChecklist">
+                <li data-review="monthlySavings">Economia mensal</li>
+                <li data-review="annualSavings">Economia anual</li>
+                <li data-review="discount">Desconto</li>
+                <li data-review="newInvoice">Nova fatura</li>
+                <li data-review="kwhRate">Valor do kWh</li>
+                <li data-review="cosip">COSIP / CIP</li>
+                <li data-review="installments">Parcelamentos</li>
+                <li data-review="fines">Multas</li>
+                <li data-review="interest">Juros</li>
+                <li data-review="monetaryCorrection">Correção monetária</li>
+              </ul>
+            </article>
+
+            <article class="artwork-card" aria-labelledby="artworkPreviewTitle">
+              <div class="artwork-card__header">
+                <div>
+                  <p class="panel__eyebrow">Canvas 1080 × 1080</p>
+                  <h2 id="artworkPreviewTitle">Prévia da arte</h2>
+                </div>
+              </div>
+
+              <div class="canvas-wrapper">
+                <canvas
+                  id="simulationCanvas"
+                  width="1080"
+                  height="1080"
+                  aria-label="Prévia da arte da simulação"
+                >
+                  Seu navegador não oferece suporte ao Canvas.
+                </canvas>
+
+                <div class="canvas-placeholder" id="canvasPlaceholder">
+                  <span class="canvas-placeholder__icon" aria-hidden="true">▦</span>
+                  <strong>A arte será exibida aqui</strong>
+                  <p>Revise os dados antes de gerar a imagem.</p>
+                </div>
+              </div>
+
+              <div class="artwork-card__actions">
+                <button
+                  class="button button--secondary"
+                  id="downloadPngButton"
+                  type="button"
+                  disabled
+                >
+                  Baixar PNG
+                </button>
+
+                <button
+                  class="button button--secondary"
+                  id="shareArtworkButton"
+                  type="button"
+                  disabled
+                >
+                  Compartilhar
+                </button>
+              </div>
+            </article>
+          </div>
+        </aside>
+      </div>
+    </main>
+
+    <footer class="app-footer">
+      <p>
+        Energizar Livre — Simulador profissional de economia de energia.
+      </p>
+    </footer>
+  </div>
+
+  <noscript>
+    <div class="noscript-message">
+      Este sistema precisa do JavaScript ativado para validar, calcular e gerar
+      a arte da simulação.
+    </div>
+  </noscript>
+
+  <script type="module" src="./script.js"></script>
+</body>
+</html>
